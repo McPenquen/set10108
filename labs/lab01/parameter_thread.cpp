@@ -7,7 +7,7 @@
 using namespace std;
 using namespace std::chrono;
 
-constexpr size_t num_threads = 100;
+constexpr size_t num_threads = 10;
 
 void task(size_t n , int val)
 {
@@ -25,7 +25,10 @@ int main(int argc, char **argv)
     // Create 100 threads in a vector
     vector<thread> threads;
     for (size_t i = 0; i < num_threads; ++i)
+    {
         threads.push_back(thread(task, i, e()));
+    }
+        
 
     // Use C++ ranged for loop to join the threads
     // Same as foreach in C#
