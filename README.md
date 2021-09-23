@@ -1,4 +1,6 @@
-Software Requirements:
+# Concurrent and Parallel Systems
+
+## Software Requirements:
 
 * Latest stable CMake (GUI version helps)
 * Visual Studio Community
