@@ -1,4 +1,4 @@
-#include <thread>
+ #include <thread>
 #include <array>
 #include <iostream>
 #include <functional>
@@ -30,6 +30,8 @@ using namespace std::chrono;
         Add another task that always runs (in addition to the other two) and calculates the frequencies of each word in the lorem ipsum text tokens, and prints them just before it joins
 */
 
+using namespace std;
+using namespace this_thread;
 
 // This is some sample code provided for use within tasks/threads. 
 struct work_pile_t
@@ -101,26 +103,119 @@ Dui nunc mattis enim ut tellus. Dictum non consectetur a erat nam at lectus urna
     return output;
 }
 
+void fixed_processor(string& str, bool & isPoolRunning)
+{
+    while (isPoolRunning)
+    {
+        if (str.size() != 0 && str.size() >= 4)
+        {
+            str = "";
+            sleep_for(milliseconds(2));
+        }
+    }
+}
+
+void variable_processor(string& str, bool & isPoolRunning)
+{
+    while (isPoolRunning)
+    {
+        if (str.size() != 0 && str.size() < 4)
+        {
+            str = "";
+            sleep_for(milliseconds(str.size()));
+        }
+    }
+}
+
 static const std::vector<std::string> g_LoremIpsumParts = LoremIpsumParts();
 
 int main(int argc, char **argv)
 {
     // TODO: create threads
 
+    // Number of threads
+    int number_threads = 2;
+    // Vector for the threads to live in
+    vector<thread> pool;
+    pool.reserve(number_threads);
+    
+    //The input string
+    string inputString = "";
+    // The running threads flag in the pool
+    bool isRunningThreads = true;
+
+    // Create threads
+    for (size_t i = 0; i < number_threads / 2; i++)
+    {
+        pool.push_back(thread([&isRunningThreads, &inputString] {
+            while (isRunningThreads)
+            {
+                if (inputString.size() != 0 && inputString.size() >= 4)
+                {
+                    inputString = "";
+                    sleep_for(milliseconds(2));
+                }
+            }
+        }));
+    }
+
+    for (size_t i = 0; i < number_threads / 2; i++)
+    {
+        pool.push_back(thread([&isRunningThreads, &inputString] {
+            while (isRunningThreads)
+            {
+                if (inputString.size() != 0 && inputString.size() < 4)
+                {
+                    inputString = "";
+                    sleep_for(milliseconds(inputString.size()));
+                }
+            }
+        }));
+    }
+
+
     // Continuous loop that reads some text and pu
     work_pile_t work_pile;
 
     // TODO: later on, replace this while loop with the lorem ipsum processing
+    cout << "START TYPING" << endl;
+
     while (true)
     {
         std::string text;
         std::cin >> text;
         if (text == "stop")
+        {
+            cout << "STOPPING" << endl;
             break;
+        }
+            
         work_pile.Put(text);
     }
+    
+    while (work_pile.Num() > 0)
+    {
+        cout << "Processing... Left: " << work_pile.Num() << endl;
+        // Update the input string
+        inputString = work_pile.Pop();
 
+        // Join the threads
+        for (auto& t : pool)
+        {
+            t.join();
+        }
+    }
+
+    cout << "DETACHING" << endl;
     // TODO: exit gracefully
+    isRunningThreads = false;
+    // Detach the threads
+    for (auto& t : pool)
+    {
+        t.detach();
+    }
 
+    cout << "END" << endl;
+    
     return 0;
 }
