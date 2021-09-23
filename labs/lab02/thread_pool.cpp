@@ -131,51 +131,66 @@ static const std::vector<std::string> g_LoremIpsumParts = LoremIpsumParts();
 
 int main(int argc, char **argv)
 {
+    // Continuous loop that reads some text and pu
+    work_pile_t work_pile;
+
     // TODO: create threads
 
     // Number of threads
-    int number_threads = 2;
+    int number_threads = 10;
     // Vector for the threads to live in
     vector<thread> pool;
     pool.reserve(number_threads);
-    
-    //The input string
-    string inputString = "";
-    // The running threads flag in the pool
-    bool isRunningThreads = true;
 
     // Create threads
     for (size_t i = 0; i < number_threads / 2; i++)
     {
-        pool.push_back(thread([&isRunningThreads, &inputString] {
-            while (isRunningThreads)
+        pool.push_back(thread([&work_pile] {
+            while (true)
             {
-                if (inputString.size() != 0 && inputString.size() >= 4)
+                string str = work_pile.Pop();
+                if (str.size() != 0)
                 {
-                    inputString = "";
-                    sleep_for(milliseconds(2));
+                    if (str.size() >= 4)
+                    {
+                        sleep_for(milliseconds(2));
+                    }
+                    else
+                    {
+                        work_pile.Put(str);
+                    }
+                    
                 }
+                sleep_for(std::chrono::milliseconds(5));
             }
         }));
+        // Detach the thread to not join it later
+        pool.back().detach();
     }
 
     for (size_t i = 0; i < number_threads / 2; i++)
     {
-        pool.push_back(thread([&isRunningThreads, &inputString] {
-            while (isRunningThreads)
+        pool.push_back(thread([&work_pile] {
+            while (true)
             {
-                if (inputString.size() != 0 && inputString.size() < 4)
+                string str = work_pile.Pop();
+                if (str.size() != 0)
                 {
-                    inputString = "";
-                    sleep_for(milliseconds(inputString.size()));
+                    if (str.size() < 4)
+                    {
+                        sleep_for(milliseconds(str.size()));
+                    }
+                    else
+                    {
+                        work_pile.Put(str);
+                    }
                 }
+                sleep_for(std::chrono::milliseconds(5));
             }
         }));
+        // Detach the thread to not join it later
+        pool.back().detach();
     }
-
-
-    // Continuous loop that reads some text and pu
-    work_pile_t work_pile;
 
     // TODO: later on, replace this while loop with the lorem ipsum processing
     cout << "START TYPING" << endl;
@@ -192,29 +207,14 @@ int main(int argc, char **argv)
             
         work_pile.Put(text);
     }
-    
+    // TODO: exit gracefully
+
+    // Wait for tasks to complete
     while (work_pile.Num() > 0)
     {
-        cout << "Processing... Left: " << work_pile.Num() << endl;
-        // Update the input string
-        inputString = work_pile.Pop();
-
-        // Join the threads
-        for (auto& t : pool)
-        {
-            t.join();
-        }
+        sleep_for(std::chrono::milliseconds(5));
     }
-
-    cout << "DETACHING" << endl;
-    // TODO: exit gracefully
-    isRunningThreads = false;
-    // Detach the threads
-    for (auto& t : pool)
-    {
-        t.detach();
-    }
-
+        
     cout << "END" << endl;
     
     return 0;
