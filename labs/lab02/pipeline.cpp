@@ -1,6 +1,8 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <array>
+#include <vector>
 
 using namespace std;
 using namespace std::chrono;
@@ -121,6 +123,12 @@ int main(int argc, char **argv)
     
     // Create threads
     array<thread, 3> pipeline = {thread(wash), thread(dry), thread(iron)};
+
+    while (done_num.Num() != MAX_LOADS)
+    {
+        printf("Checking work status: %d unwashed, %d washed, %d dried, %d done!\n", to_wash_num.Num(), to_dry_num.Num(), to_iron_num.Num(), done_num.Num());
+        this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     // Join them
 
