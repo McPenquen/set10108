@@ -79,7 +79,22 @@ void initialize_piles()
 
 void do_work(pile_t& pile_in, pile_t& pile_out, int work_duration, const char * name)
 {
-    // Add the logic here 
+    // TODO: Add the logic here
+    // Until we are done continue working
+    while (done_num.Num() != MAX_LOADS)
+    {
+        // Until there is work to do from the in pile continue
+        while (pile_in.Num()>0)
+        {
+            if (pile_in.Pop())
+            {
+                this_thread::sleep_for(milliseconds(work_duration));
+                pile_out.Increment();
+            }
+            
+        }
+        
+    }
 }
 
 // our 3 functions
@@ -103,6 +118,16 @@ int main(int argc, char **argv)
     initialize_piles();
 
     // create the threads, ensure the program runs until we wash/dry/iron everything, and exit gracefully
+    
+    // Create threads
+    array<thread, 3> pipeline = {thread(wash), thread(dry), thread(iron)};
+
+    // Join them
+
+    for (auto& thread1 : pipeline)
+    {
+        thread1.join();
+    }
 
     return 0;
 }
