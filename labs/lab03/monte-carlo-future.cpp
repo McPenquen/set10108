@@ -84,7 +84,7 @@ int main(int argc, char **argv)
             data << ", " << duration_cast<milliseconds>(total).count();
         }
         data << endl;
-    }
+    } 
     // Close the file
     data.close();
     return 0;
