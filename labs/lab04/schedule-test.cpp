@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
     // Get start time
     auto start = system_clock::now();
-#pragma omp parallel for num_threads(thread_count) reduction(+:sum) schedule(static, 1)
+#pragma omp parallel for num_threads(thread_count) reduction(+:sum) schedule(static, 10)
     for (auto i = 0; i <= n; ++i)
         sum += f(i);
     // Get end time
