@@ -1,0 +1,13 @@
+project(set10108-lab06b LANGUAGES CXX CUDA)
+cmake_minimum_required(VERSION 3.17)
+set(CMAKE_CXX_STANDARD 17)
+include_directories(../contrib)
+ 
+add_executable(1D_smoothing 1D_smoothing.cu)
+set_property(TARGET 1D_smoothing PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+add_executable(2D_smoothing 2D_smoothing.cu)
+set_property(TARGET 2D_smoothing PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+add_executable(info-cuda info.cu)
+set_property(TARGET info-cuda PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+add_executable(vec-add-cuda vec-add.cu)
+set_property(TARGET info-cuda PROPERTY CUDA_SEPARABLE_COMPILATION ON)
